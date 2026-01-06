@@ -8,14 +8,17 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "messages")
+@Table(name = "encryptedMessages")
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 1000)
-    private String content;
+    @Column(nullable = false, length = 1000, columnDefinition = "TEXT")
+    private String cipherText;
+
+    @Column(nullable = false, length = 32)
+    private String iv;
 
     @Column(nullable = false)
     private String sender;

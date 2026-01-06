@@ -1,3 +1,11 @@
+import {
+    getReceiverPublicKey,
+    deriveAESKey,
+    encryptMessage,
+    decryptMessage,
+    getUsernameFromJWT,
+    ensureECCKeys, uploadPublicKey
+} from "./crypto.js"
 // ===== DOM ELEMENTS =====
 const receiverInput = document.getElementById("receiver");
 const messageInput = document.getElementById("message");
@@ -8,12 +16,22 @@ let stompClient = null;
 let isConnected = false;
 
 // ===== CONNECT WEBSOCKET ON PAGE LOAD =====
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    document.getElementById("sendMessage").addEventListener("click",sendMessage );
+
+    document.getElementById("logout").addEventListener("click",logout);
+
+    document.getElementById("startChat").addEventListener("click",getChatHistory);
+
+    await ensureECCKeys();
+
+    await uploadPublicKey();
+
     connectWebSocket();
 });
 
 // ===== LOAD CHAT HISTORY =====
-function getChatHistory() {
+async function getChatHistory() {
     const token = localStorage.getItem("token")?.trim();
     const otherUser = receiverInput.value;
 
@@ -28,26 +46,56 @@ function getChatHistory() {
         return;
     }
 
-    fetch(`/easychat/api/chat/history?otherUser=${encodeURIComponent(otherUser)}`, {
-        headers: {
-            "Authorization": "Bearer " + token
+    const res = await fetch(`/easychat/api/chat/history?otherUser=${encodeURIComponent(otherUser)}`,
+        {
+            headers:{
+                "Authorization": "Bearer " + token
+            }
+        });
+
+    const messages =await res.json();
+    clearMessages();
+
+    for(const m of messages){
+        try{
+            const peer = (m.sender === getUsernameFromJWT())? m.receiver : m.sender;
+
+            const peerPubKey = await getReceiverPublicKey(peer);
+
+            const AESKey = await deriveAESKey(peerPubKey);
+
+            const plainText = await decryptMessage(m.cipherText, m.iv, AESKey);
+
+            appendMessage(m.sender, plainText);
+
+        }catch (e){
+            console.log("History Decryption failed!",e);
         }
-    })
-        .then(res => {
-            if (!res.ok) throw new Error("Failed to load history");
-            return res.json();
-        })
-        .then(data => {
-            messages.innerHTML = "";
-            data.forEach(m => {
-                appendMessage(m.sender, m.content);
-            });
-        })
-        .catch(err => console.error(err));
+    }
+
+
+
+
+    // fetch(`/easychat/api/chat/history?otherUser=${encodeURIComponent(otherUser)}`, {
+    //     headers: {
+    //         "Authorization": "Bearer " + token
+    //     }
+    // })
+    //     .then(res => {
+    //         if (!res.ok) throw new Error("Failed to load history");
+    //         return res.json();
+    //     })
+    //     .then(data => {
+    //         messages.innerHTML = "";
+    //         data.forEach(m => {
+    //             appendMessage(m.sender, m.content);
+    //         });
+    //     })
+    //     .catch(err => console.error(err));
 }
 
 // ===== CONNECT WEBSOCKET (ONCE) =====
-function connectWebSocket() {
+async function connectWebSocket() {
     const token = localStorage.getItem("token")?.trim();
 
     if (!token) {
@@ -71,9 +119,20 @@ function connectWebSocket() {
             console.log("✅ WebSocket connected");
             isConnected = true;
 
-            stompClient.subscribe("/user/queue/messages", msg => {
+            stompClient.subscribe("/user/queue/messages", async msg => {
                 const m = JSON.parse(msg.body);
-                appendMessage(m.sender, m.content);
+
+                try {
+                    const senderPublicKey = await getReceiverPublicKey(m.sender);
+
+                    const AESKey = await deriveAESKey(senderPublicKey);
+
+                    const plainText = await decryptMessage(m.cipherText, m.iv, AESKey);
+                    appendMessage(m.sender, plainText);
+                }catch (e){
+                    console.error("Decryption failed!",e);
+                }
+
             });
         },
         error => {
@@ -84,24 +143,39 @@ function connectWebSocket() {
 }
 
 // ===== SEND MESSAGE =====
-function sendMessage() {
+async function sendMessage() {
+    const receiverInput = document.getElementById("receiver");
+    const messageInput = document.getElementById("message");
+
+    const receiver = receiverInput.value.trim();
+    const text = messageInput.value.trim();
+
     if (!stompClient || !isConnected) {
         alert("WebSocket not connected yet");
         return;
     }
 
-    if (!messageInput.value.trim()) return;
-    if (!receiverInput.value.trim()) return;
+    if (!receiver || !text) return;
+
+    //1) get receivers public key
+    const recPublicKey = await getReceiverPublicKey(receiver);
+
+    //2) derive AES KEY
+    const AESKey = await deriveAESKey(recPublicKey);
+
+    //3) encrypt the message
+    const {cipherText, iv} = await encryptMessage(text,AESKey);
 
     stompClient.send(
         "/app/chat.send",
         {},
         JSON.stringify({
-            receiver: receiverInput.value,
-            content: messageInput.value
+            receiver: receiver,
+            cipherText: cipherText,
+            iv: iv
         })
     );
-
+    appendMessage(getUsernameFromJWT(), text);
     messageInput.value = "";
 }
 
@@ -113,4 +187,25 @@ function appendMessage(sender, content) {
 
     // auto-scroll
     messages.scrollTop = messages.scrollHeight;
+}
+function logout() {
+
+    // 1. Disconnect WebSocket safely
+    if (stompClient && stompClient.connected) {
+        stompClient.disconnect(() => {
+            console.log("WebSocket disconnected");
+        });
+    }
+
+    // 2. Remove JWT
+    localStorage.removeItem("token");
+
+    // (optional but clean)
+    localStorage.clear();
+
+    // 3. Redirect to login page
+    window.location.href = "/easychat/login.html";
+}
+function clearMessages() {
+    document.getElementById("messages").innerHTML = "";
 }

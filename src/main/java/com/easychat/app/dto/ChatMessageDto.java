@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 public class ChatMessageDto {
-    private String content;
     private String receiver;
+    private String cipherText;
+    private String iv;
     private String sender;
 }

@@ -9,10 +9,12 @@
 <h2>Login Page</h2>
 <label for="usernameOrEmail">Username Or Email: </label><input id="usernameOrEmail" placeholder="username or email"/>
 <label for="password">Password: </label><input id="password" type="password" placeholder="password"/>
-<button onclick="login()">Login</button>
-<p id="msg"></p>
+<button  id="loginBtn">Login</button>
 
-<script src="/easychat/js/login.js"></script>
+<p id="msg"></p>
+<button onclick=" window.location.href='/easychat/register.html'" id="registerButton" > Register </button>
+
+<script type="module" src= "js/login.js"></script>
 
 </body>
 </html>

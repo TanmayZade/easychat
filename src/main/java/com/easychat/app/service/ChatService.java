@@ -20,7 +20,7 @@ public class ChatService {
     }
 
     public List<ChatMessageDto> getChatHistory(String user1, String user2){
-        List<Message> messages = messageRepository.findBySenderAndReceiverOrSenderAndReceiverOrderByTimestampAsc(user1, user2, user1, user2);
+        List<Message> messages = messageRepository.findBySenderAndReceiverOrSenderAndReceiverOrderByTimestampAsc(user1, user2, user2, user1);
 
         return messages.stream()
                 .map(message -> modelMapper.map(message, ChatMessageDto.class))

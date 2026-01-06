@@ -8,17 +8,20 @@
 <h2>EasyChat</h2>
 <label for="receiver">Receiver Name</label>
 <input id="receiver" placeholder="enter the receiver name"/>
-<button onclick="getChatHistory()"> Start Chat</button>
-
+<button id="startChat"> Start Chat</button>
+<p id="startChatting"> </p>
 <ul id = "messages"></ul>
 
 <label for="message">Message</label>
 <input id = "message" placeholder="Enter the message...."/>
-<button onclick="sendMessage()">Send</button>
+<button id="sendMessage">Send</button>
+
+<button id="logout" style="float:right;">Logout</button>
+
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
 
-<script src = "/easychat/js/chat.js"></script>
+<script type="module" src = "js/chat.js"></script>
 </body>
 </html>
