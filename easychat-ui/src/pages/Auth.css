@@ -1,0 +1,79 @@
+/* Auth.css */
+
+.auth-page {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.auth-card {
+    background: #fff;
+    padding: 32px;
+    border-radius: 12px;
+    width: 320px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.auth-title {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.auth-input {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.eye-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.auth-btn {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background: #667eea;
+    color: #fff;
+}
+
+.auth-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.auth-error {
+    color: #d9534f;
+    font-size: 14px;
+    text-align: center;
+}
+
+.auth-footer {
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-link {
+    color: #667eea;
+    cursor: pointer;
+    font-weight: bold;
+}

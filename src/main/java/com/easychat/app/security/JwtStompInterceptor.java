@@ -18,6 +18,10 @@ public class JwtStompInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor =
                 MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
+        if (accessor == null) {
+            return message;
+        }
+
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
 
             String authHeader = accessor.getFirstNativeHeader("Authorization");
@@ -34,9 +38,10 @@ public class JwtStompInterceptor implements ChannelInterceptor {
 
             String username = JwtUtil.extractUsername(token);
 
-            accessor.setUser(() -> username); // Principal
+            accessor.setUser(() -> username);
         }
 
         return message;
     }
+
 }

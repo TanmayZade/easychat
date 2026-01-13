@@ -26,7 +26,6 @@ public class WebSocketController {
 
         chatService.saveMessage(dto);
         simpMessagingTemplate.convertAndSendToUser(dto.getReceiver(),"/queue/messages", dto);
-        simpMessagingTemplate.convertAndSendToUser(dto.getSender(),"/queue/messages", dto);
 
     }
 }

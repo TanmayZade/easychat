@@ -20,14 +20,15 @@ public class UserKeyService {
     private final UserKeyRepository repository;
     @Transactional
     public void savePublicKey(String username, String jwk) {
-        try {
+        if (repository.existsById(username)) {
+            throw new PublicKeyAlreadyExistException(username);
+        }
+
             UserKey key = new UserKey();
             key.setUsername(username);
             key.setPublicKeyJwk(jwk);
             repository.save(key);
-        } catch (DataIntegrityViolationException ex) {
-            throw new PublicKeyAlreadyExistException(username);
-        }
+
     }
 
 
