@@ -11,9 +11,4 @@ public class HealthController {
         System.out.println("EasyChat is working!");
         return "EasyChat is working!";
     }
-
-    @GetMapping("/")
-    public String health() {
-        return "OK";
-    }
 }
