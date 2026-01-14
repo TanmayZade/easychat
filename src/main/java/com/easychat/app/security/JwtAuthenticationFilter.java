@@ -24,7 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        System.out.println("JWT FILTER PATH: " + request.getRequestURI());
+//        System.out.println("JWT FILTER PATH: " + request.getRequestURI());
 
         // remove context path (/easychat)
         String contextPath = request.getContextPath();

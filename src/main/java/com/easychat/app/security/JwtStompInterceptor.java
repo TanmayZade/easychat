@@ -1,5 +1,6 @@
 package com.easychat.app.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -9,9 +10,9 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
 
 @Component
-
+@RequiredArgsConstructor
 public class JwtStompInterceptor implements ChannelInterceptor {
-
+    private final JwtUtil jwtUtil;
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
@@ -32,11 +33,11 @@ public class JwtStompInterceptor implements ChannelInterceptor {
 
             String token = authHeader.substring(7);
 
-            if (!JwtUtil.isValidToken(token)) {
+            if (!jwtUtil.isValidToken(token)) {
                 throw new IllegalArgumentException("Invalid JWT");
             }
 
-            String username = JwtUtil.extractUsername(token);
+            String username = jwtUtil.extractUsername(token);
 
             accessor.setUser(() -> username);
         }

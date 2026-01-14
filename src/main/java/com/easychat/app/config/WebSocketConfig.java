@@ -2,8 +2,10 @@ package com.easychat.app.config;
 
 import com.easychat.app.security.JwtHandshakeInterceptor;
 import com.easychat.app.security.JwtStompInterceptor;
+import com.easychat.app.security.JwtUtil;
 import com.easychat.app.security.UserHandshakeHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -18,6 +20,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtStompInterceptor jwtStompInterceptor;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -30,10 +33,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry){
         registry.addEndpoint("/ws-chat")
-                .setHandshakeHandler(new UserHandshakeHandler())
+                .setHandshakeHandler(userHandshakeHandler())
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
+
+
+    @Bean
+    public UserHandshakeHandler userHandshakeHandler() {
+        return new UserHandshakeHandler(jwtUtil);
+    }
+
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(jwtStompInterceptor);
