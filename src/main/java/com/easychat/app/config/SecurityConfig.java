@@ -1,5 +1,6 @@
 package com.easychat.app.config;
 
+import org.springframework.http.HttpMethod;
 import com.easychat.app.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors(cors ->{})
+                .cors(cors -> {})
+
                 .csrf(csrf -> csrf.disable())
+
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
 
@@ -34,24 +37,29 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/",
-                                "/api/auth/**",
-                                "/ws-chat/**",
-                                "/chat.send",
-                                "/health",
-                                "/index.html",
-                                "/chat.html",
-                                "/register.html",
-                                "/crypto-test.html",
-                                "/login.html",
-                                "/js/**",
-                                "/css/**",
-                                "/images/**",
-                                "/api/keys/**"
+                                HttpMethod.OPTIONS, "/**"
                         ).permitAll()
+
+                        .requestMatchers(
+                                "/easychat/",
+                                "/easychat/api/auth/**",
+                                "/easychat/ws-chat/**",
+                                "/easychat/chat.send",
+                                "/easychat/health",
+                                "/easychat/index.html",
+                                "/easychat/chat.html",
+                                "/easychat/register.html",
+                                "/easychat/login.html",
+                                "/easychat/js/**",
+                                "/easychat/css/**",
+                                "/easychat/images/**",
+                                "/easychat/api/keys/**"
+                        ).permitAll()
+
                         .anyRequest().authenticated()
                 )
 
+                // JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -59,7 +67,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
-
 }

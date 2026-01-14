@@ -16,7 +16,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "https://easychateasy.vercel.app/"
+                "https://easychateasy.vercel.app"
         ));
 
         config.setAllowedMethods(List.of(
