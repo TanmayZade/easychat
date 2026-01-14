@@ -106,7 +106,7 @@ public class UserService {
         }
         System.out.println("Username is present but not verified");
 
-        return false;
+        return true;
 
     }
 
