@@ -108,58 +108,66 @@ export async function loadKey(name){
 }
 
 export function getUsernameFromJWT() {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
 
-    const payloadBase64 = token.split(".")[1];
-    const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
-    const payload = JSON.parse(payloadJson);
+        const payloadBase64 = token.split(".")[1];
+        const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
+        const payload = JSON.parse(payloadJson);
 
-    return payload.sub; // username
-}
+        return payload.sub;
+    } catch {
+        return null;
+    }
 
-export async function ensureECCKeys(){
+export async function ensureECCKeys() {
     const username = getUsernameFromJWT();
-    // const publicKey = await loadKey(`publicKey:${username}`);
 
-    const existingPrivateKey = await loadKey(`privateKey:${username}`);
+    const privateKey = await loadKey(`privateKey:${username}`);
+    const publicKey  = await loadKey(`publicKey:${username}`);
 
-    if(existingPrivateKey){
-        console.log("Private key already exist");
+    if (privateKey && publicKey) {
+        console.log("ECC keys already exist");
         return;
     }
 
     const keyPair = await crypto.subtle.generateKey(
         {
-            name:"ECDH",
+            name: "ECDH",
             namedCurve: "P-256"
         },
         true,
         ["deriveKey"]
     );
 
-    await saveKey(  `publicKey:${username}`,keyPair.publicKey);
+    await saveKey(`publicKey:${username}`, keyPair.publicKey);
     await saveKey(`privateKey:${username}`, keyPair.privateKey);
 
-    console.log("ECC pair generated and stored successfully")
-
+    console.log("ECC pair generated and stored successfully");
 }
 
-export async function uploadPublicKey(){
+
+export async function uploadPublicKey() {
     const username = getUsernameFromJWT();
     const flagKey = `publicKeyUploaded:${username}`;
 
     if (localStorage.getItem(flagKey) === "true") {
-        return; //  do nothing
+        return;
     }
 
     const publicKey = await loadKey(`publicKey:${username}`);
 
-    const jwk = await crypto.subtle.exportKey("jwk",publicKey);
+    if (!publicKey) {
+        console.error("❌ Public key not found in IndexedDB");
+        return;
+    }
+
+    const jwk = await crypto.subtle.exportKey("jwk", publicKey);
 
     const token = localStorage.getItem("token");
     if (!token) throw new Error("JWT not found");
-
+    localStorage.setItem(flagKey, "true");
     const res = await fetch(`${API_BASE}/easychat/api/keys/upload`,{
         method: "POST",
         headers:{
@@ -178,11 +186,11 @@ export async function uploadPublicKey(){
 
     if (!res.ok) {
         const text = await res.text();
+            localStorage.removeItem(flagKey);
+
         throw new Error("Key upload failed: " + text);
     }
 
     console.log("Public key uploaded to server");
-    localStorage.setItem(flagKey, "true");
-
 
 }
