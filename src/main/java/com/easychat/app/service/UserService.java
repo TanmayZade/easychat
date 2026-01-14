@@ -67,9 +67,9 @@ public class UserService {
             throw new AuthenticationException("Wrong Password");
         }
 
-        if(!user.isVerified()){
-            throw new AuthenticationException("User not verified");
-        }
+//        if(!user.isVerified()){
+//            throw new AuthenticationException("User not verified");
+//        }
 
         return user;
     }
