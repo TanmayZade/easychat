@@ -2,6 +2,8 @@ package com.easychat.app.service;
 
 import com.easychat.app.exception.PublicKeyAlreadyExistException;
 import com.easychat.app.exception.PublicKeyNotFoundException;
+import com.easychat.app.model.EmailVerificationToken;
+import com.easychat.app.model.User;
 import com.easychat.app.model.UserKey;
 import com.easychat.app.repository.UserKeyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -37,4 +41,6 @@ public class UserKeyService {
                 .orElseThrow(() -> new PublicKeyNotFoundException(username))
                 .getPublicKeyJwk();
     }
+
+
 }

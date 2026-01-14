@@ -30,14 +30,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return path.equals("/") ||
-                path.equals("/index.html") ||
-                path.equals("/register.html") ||
                 path.startsWith("/api/auth") ||
-                path.equals("/login.html") ||
-                path.equals("/chat.html") ||
-                path.equals("/crypto-test.html") ||
-                path.startsWith("/js/") ||
-                path.startsWith("/css/") ||
+                path.startsWith("/api/keys") ||
+                path.startsWith("/api/users") ||
                 path.startsWith("/ws-chat") ||
                 path.equals("/health");
     }
@@ -49,14 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        System.out.println(">>> JWT FILTER EXECUTED <<<");
-        System.out.println("JWT FILTER PATH: " + request.getRequestURI());
-
-
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing JWT");
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -75,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         filterChain.doFilter(request, response);
     }
+
 }

@@ -23,11 +23,27 @@ function Chat(){
     const [receiver, setReceiver] = useState("");
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
+    const [contacts, setContacts] = useState([]);
+    const [newChatUser, setNewChatUser] = useState("");
+    const [startChatError, setStartChatError] = useState("");
+    const [checkingUser, setCheckingUser] = useState(false);
 
     //Websocket Ref
     const stompClientRef = useRef(null);
     const connectedRef = useRef(false);
     const subscriptionRef = useRef(null);
+    const activeReceiverRef = useRef("");
+
+    //for updating current receiver in websocket
+    useEffect(() => {
+        activeReceiverRef.current = receiver;
+    }, [receiver]);
+
+    useEffect(() => {
+        if (newChatUser.trim() === "") {
+            setStartChatError("");
+        }
+    }, [newChatUser]);
 
     //Auth + init
     useEffect(() =>{
@@ -40,6 +56,7 @@ function Chat(){
             try{
                 await ensureECCKeys();
                 await uploadPublicKey();
+                await loadContacts();
                 connectWebSocket();
             }catch (e){
                 console.error("Init failed",e);
@@ -52,9 +69,47 @@ function Chat(){
             subscriptionRef.current?.unsubscribe();
             stompClientRef.current?.deactivate();
             stompClientRef.current = null;
-
         };
     },[navigate]);
+
+    //load contacts
+    async function loadContacts() {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(
+                `${API_BASE}/easychat/api/chat/contacts`,
+                {
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                }
+            );
+
+            if (!res.ok) {
+                const text = await res.text();
+                console.error("Contacts API failed:", text);
+                setContacts([]);
+                return;
+            }
+
+            const data = await res.json();   // ✅ data defined HERE
+            console.log("RAW contacts response:", data);
+
+            if (Array.isArray(data)) {
+                setContacts(data);
+            } else if (data && Array.isArray(data.contacts)) {
+                setContacts(data.contacts);
+            } else {
+                console.error("Unexpected contacts format:", data);
+                setContacts([]);
+            }
+
+        } catch (err) {
+            console.error("Failed to load contacts", err);
+            setContacts([]);
+        }
+    }
 
     //Connect Websocket
 
@@ -80,26 +135,41 @@ function Chat(){
                     "/user/queue/messages",
                     async (msg) => {
                         const m = JSON.parse(msg.body);
-                        console.log("WS RECEIVED", msg.body, Date.now());
-
                         const myUsername = getUsernameFromJWT();
-                        if (m.sender === myUsername) {
-                            return;
-                        }
-                        if (m.sender != receiver) {
-                            alert(`New message from user ${m.sender}`);
-                            return;
-                        }
+
+                        // Ignore own messages
+                        if (m.sender === myUsername) return;
+
+                        // Decrypt
                         const senderKey = await getReceiverPublicKey(m.sender);
                         const AESKey = await deriveAESKey(senderKey);
-                        const text = await decryptMessage(m.cipherText, m.iv, AESKey);
+                        let text;
 
-                        setMessages((prev) => [
-                            ...prev,
-                            { sender: m.sender, content: text },
-                        ]);
+                        try {
+                            text = await decryptMessage(m.cipherText, m.iv, AESKey);
+                        } catch (err) {
+                            console.warn("Decryption failed (likely new device login)", err);
+
+                            text = "🔒 Message cannot be decrypted on this device";
+                        }
+
+                        // Ensure contact exists
+                        setContacts((prev) =>
+                            prev.includes(m.sender) ? prev : [...prev, m.sender]
+                        );
+
+                        // ✅ USE REF, NOT STATE
+                        if (m.sender === activeReceiverRef.current) {
+                            setMessages((prev) => [
+                                ...prev,
+                                { sender: m.sender, content: text }
+                            ]);
+                        } else {
+                            alert(`🔔 New message from ${m.sender}`);
+                        }
                     }
                 );
+
             },
 
             onStompError: (frame) => {
@@ -113,15 +183,15 @@ function Chat(){
 
 
     //Load Chat History
-    async function loadChatHistory(){
-        if(!receiver){
+    async function loadChatHistory(user = receiver){
+        if(!user){
             alert("Enter receiver name");
             return;
         }
 
         const token = localStorage.getItem("token");
         const res = await fetch(
-            `${API_BASE}/easychat/api/chat/history?otherUser=${encodeURIComponent(receiver)}`,
+            `${API_BASE}/easychat/api/chat/history?otherUser=${encodeURIComponent(user)}`,
             {
                 headers: { Authorization: "Bearer " + token }
             }
@@ -152,10 +222,58 @@ function Chat(){
                     { sender: m.sender, content: plainText }
                 ]);
             }catch (e){
-                console.log("History decryption failed for ",e);
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        sender: m.sender,
+                        content: "🔒 Message cannot be decrypted on this device"
+                    }
+                ]);
             }
         }
 
+    }
+
+    //openchat with particular user
+    async function openChat(username){
+        activeReceiverRef.current = username;
+        setReceiver(username);
+        setMessages([]);
+        await loadChatHistory(username);
+    }
+
+    //start new chat
+    async function startNewChat() {
+        if (!newChatUser) return;
+
+        setStartChatError("");
+        setCheckingUser(true);
+
+        try {
+            const result = await checkUserExists(newChatUser);
+
+            if (!result.exists) {
+                setStartChatError("❌ username does not exist");
+                return;
+            }
+
+            // ✅ User exists & verified
+            activeReceiverRef.current = newChatUser;
+            setReceiver(newChatUser);
+            setMessages([]);
+
+            // Optionally add to contacts list immediately
+            if (!contacts.includes(newChatUser)) {
+                setContacts(prev => [...prev, newChatUser]);
+            }
+
+            setNewChatUser("");
+
+        } catch (err) {
+            setStartChatError("⚠️ Unable to verify user. Try again.");
+        } finally {
+            setCheckingUser(false);
+        }
     }
 
     // SEND Message
@@ -187,6 +305,9 @@ function Chat(){
                 ...prev,
                 { sender: getUsernameFromJWT(), content: message }
             ]);
+            if (!contacts.includes(receiver)) {
+                setContacts((prev) => [...prev, receiver]);
+            }
 
             setMessage("");
         }catch (e){
@@ -205,33 +326,84 @@ function Chat(){
         navigate("/login");
     }
 
+    async function checkUserExists(username) {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(
+            `${API_BASE}/easychat/api/chat/exists?username=${encodeURIComponent(username)}`,
+            {
+                headers: {
+                    Authorization: "Bearer " + token
+                }
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error("User check failed");
+        }
+
+        return await res.json(); // { exists: true/false }
+    }
+
 
     // ===== UI =====
     return (
         <div className="chat-container">
             {/* Header */}
             <div className="chat-header">
-                <h3>🔐 Secure Chat</h3>
+                <h3>🔐 EasyChat</h3>
                 <button className="logout-btn" onClick={logout}>Logout</button>
             </div>
 
             {/* Body */}
             <div className="chat-body">
                 {/* Left Panel */}
+                {/* Left Panel */}
                 <div className="chat-sidebar">
+                    <h4>Chats</h4>
+
+                    {contacts.length === 0 && (
+                        <p className="empty-text">No chats yet</p>
+                    )}
+
+                    {contacts.map((u) => (
+                        <div
+                            key={u}
+                            className={`contact ${receiver === u ? "active" : ""}`}
+                            onClick={() => openChat(u)}
+                        >
+                            {u}
+                        </div>
+                    ))}
+
+                    <hr />
+
                     <input
-                        className="receiver-input"
-                        placeholder="Receiver username"
-                        value={receiver}
-                        onChange={(e) => setReceiver(e.target.value)}
+
+                        placeholder="Start new chat"
+                        value={newChatUser}
+                        onChange={(e) => setNewChatUser(e.target.value)}
                     />
-                    <button className="start-btn" onClick={loadChatHistory}>
-                        Start Chat
-                    </button>
+                    <button onClick={startNewChat}>Start</button>
+                    {startChatError && (
+                        <p className="error-text">{startChatError}</p>
+                    )}
+
+                    {checkingUser && (
+                        <p className="info-text">Checking user...</p>
+                    )}
                 </div>
+
 
                 {/* Chat Area */}
                 <div className="chat-main">
+                    <div className="chat-title">
+                        {receiver ? (
+                            <h4>Chatting with {receiver}</h4>
+                        ) : (
+                            <h4>Select a chat</h4>
+                        )}
+                    </div>
                     <div className="messages">
                         {messages.map((m, i) => (
                             <div

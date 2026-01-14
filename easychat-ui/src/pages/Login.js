@@ -37,7 +37,7 @@ function Login() {
 
             navigate("/Chat");
         } catch {
-            setMsg("Login failed. Check credentials.");
+            setMsg("Login failed. Check credentials.(or Verify Email)");
         } finally {
             setLoading(false);
         }

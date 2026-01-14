@@ -26,4 +26,10 @@ public class ChatService {
                 .map(message -> modelMapper.map(message, ChatMessageDto.class))
                 .toList();
     }
+
+    public List<String> getChatContacts(String currentUser) {
+        List<String> contacts = messageRepository.findChatContacts(currentUser);
+        return contacts == null ? List.of() : contacts;
+    }
+
 }
