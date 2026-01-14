@@ -18,4 +18,5 @@ RUN ./mvnw clean package -DskipTests
 EXPOSE 8080
 
 # Run the jar (Spring Boot produces ONE jar)
-CMD ["sh", "-c", "java -jar target/*.jar"]
+CMD ["sh", "-c", "java -Dspring.main.lazy-initialization=true -jar target/*.jar"]
+
