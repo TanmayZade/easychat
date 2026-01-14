@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { ensureECCKeys, uploadPublicKey } from "./Crypto";
 import "./Auth.css";
@@ -10,8 +10,22 @@ function Login() {
     const [msg, setMsg] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
+    const [serverReady, setServerReady] = useState("");
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const wakeServer = async () => {
+            try {
+                await fetch(`${API_BASE}/easychat/health`);
+                setServerReady(true);
+            } catch (e) {
+                setServerReady(false);
+            }
+        };
+
+        wakeServer();
+    }, []);
+
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -74,9 +88,13 @@ function Login() {
                 </div>
 
                 {msg && <div className="auth-error">{msg}</div>}
-
-                <button className="auth-btn" disabled={loading}>
-                    {loading ? "Signing in…" : "Login"}
+                {!serverReady && (
+                    <div className="server-alert">
+                        ⏳ Starting secure server… First login may take up to 30 seconds.
+                    </div>
+                )}
+                <button disabled={!serverReady} className="auth-btn">
+                    {serverReady ? "Login" : "Starting server..."}
                 </button>
 
                 <p className="auth-footer">

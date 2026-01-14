@@ -66,6 +66,14 @@
     font-size: 14px;
     text-align: center;
 }
+.server-alert {
+    background: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
 
 .auth-footer {
     text-align: center;
