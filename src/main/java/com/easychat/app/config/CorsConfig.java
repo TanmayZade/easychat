@@ -15,10 +15,11 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "https://easychateasy.vercel.app"
-        ));
-
+//        config.setAllowedOrigins(List.of(
+//                "https://easychateasy.vercel.app",
+//                "http://localhost:3000"
+//        ));
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));

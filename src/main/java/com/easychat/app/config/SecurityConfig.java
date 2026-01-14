@@ -39,22 +39,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.OPTIONS, "/**"
                         ).permitAll()
+                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/easychat/").permitAll()
+                        .requestMatchers("/api//keys/**").permitAll()
 
-                        .requestMatchers(
-                                "/easychat/",
-                                "/easychat/api/auth/**",
-                                "/easychat/ws-chat/**",
-                                "/easychat/chat.send",
-                                "/easychat/health",
-                                "/easychat/index.html",
-                                "/easychat/chat.html",
-                                "/easychat/register.html",
-                                "/easychat/login.html",
-                                "/easychat/js/**",
-                                "/easychat/css/**",
-                                "/easychat/images/**",
-                                "/easychat/api/keys/**"
-                        ).permitAll()
 
                         .anyRequest().authenticated()
                 )
