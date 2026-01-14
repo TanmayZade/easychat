@@ -11,8 +11,37 @@ function Register() {
     const [msg, setMsg] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [usernameError, setUsernameError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+
+    const usernameRegex = /^[a-z0-9]+$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
     const navigate = useNavigate();
+
+    function validateUsername(value) {
+        if (!value) {
+            setUsernameError("Username is required");
+        } else if (!usernameRegex.test(value)) {
+            setUsernameError("Only lowercase letters and numbers allowed");
+        } else {
+            setUsernameError("");
+        }
+    }
+
+    function validatePassword(value) {
+        if (!value) {
+            setPasswordError("Password is required");
+        } else if (!passwordRegex.test(value)) {
+            setPasswordError(
+                "Min 8 chars, at least 1 letter and 1 number"
+            );
+        } else {
+            setPasswordError("");
+        }
+    }
+
+
 
     async function handleRegister(e) {
         e.preventDefault();
@@ -47,17 +76,33 @@ function Register() {
         }
     }
 
+    const isFormValid =
+        !usernameError &&
+        !passwordError &&
+        username &&
+        password &&
+        email;
+
     return (
         <div className="auth-page">
             <form className="auth-card" onSubmit={handleRegister}>
                 <h2 className="auth-title">📝 Create Account</h2>
-
                 <input
-                    className="auth-input"
+                    className={`auth-input ${usernameError ? "input-error" : ""}`}
                     placeholder="Username"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => {
+                        const val = e.target.value.toLowerCase();
+                        setUsername(val);
+                        validateUsername(val);
+                    }}
+                    onBlur={(e) => validateUsername(e.target.value)}
                 />
+
+                {usernameError && (
+                    <small className="field-error">{usernameError}</small>
+                )}
+
 
                 <input
                     className="auth-input"
@@ -76,11 +121,15 @@ function Register() {
 
                 <div className="password-wrapper">
                     <input
-                        className="auth-input"
+                        className={`auth-input ${passwordError ? "input-error" : ""}`}
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            validatePassword(e.target.value);
+                        }}
+                        onBlur={(e) => validatePassword(e.target.value)}
                     />
                     <button
                         type="button"
@@ -91,9 +140,14 @@ function Register() {
                     </button>
                 </div>
 
+                {passwordError && (
+                    <small className="field-error">{passwordError}</small>
+                )}
+
+
                 {msg && <div className="auth-error">{msg}</div>}
 
-                <button className="auth-btn" disabled={loading}>
+                <button className="auth-btn" disabled={loading || !isFormValid}>
                     {loading ? "Creating account…" : "Register"}
                 </button>
 

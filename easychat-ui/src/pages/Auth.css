@@ -77,3 +77,14 @@
     cursor: pointer;
     font-weight: bold;
 }
+.input-error {
+    border: 1.5px solid #e53935;
+}
+
+.field-error {
+    color: #e53935;
+    font-size: 12px;
+    margin-top: -8px;
+    margin-bottom: 10px;
+    display: block;
+}
