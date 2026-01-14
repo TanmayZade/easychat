@@ -7,8 +7,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HealthController {
     @GetMapping("/health")
-    public String healthControl(){
+    public String healthControl() {
         System.out.println("EasyChat is working!");
         return "EasyChat is working!";
+    }
+
+    @GetMapping("/")
+    public String health() {
+        return "OK";
     }
 }
