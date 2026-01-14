@@ -6,7 +6,6 @@ import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
 
 
 @SpringBootApplication
-@ServletComponentScan
 
 public class EasyChatApplication {
 	public static void main(String[] args) {

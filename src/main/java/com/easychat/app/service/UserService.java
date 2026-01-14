@@ -51,10 +51,12 @@ public class UserService {
         emailVerificationTokenRepository.save(verificationToken);
 
         //  Send verification email
-        emailService.sendVerificationEmail(
-                user.getEmail(),
-                token
-        );
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), token);
+        } catch (Exception e) {
+            // Log only – DO NOT throw
+            System.err.println("Email failed on Render: " + e.getMessage());
+        }
     }
 
     public User authenticate(String usernameOrEmail, String password){
