@@ -25,31 +25,20 @@ public class SecurityConfig {
 
         http
                 .cors(cors -> {})
-
                 .csrf(csrf -> csrf.disable())
-
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
-
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                HttpMethod.OPTIONS, "/**"
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/keys/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
-                        .requestMatchers("/easychat/").permitAll()
-                        .requestMatchers("/api//keys/**").permitAll()
-
-
                         .anyRequest().authenticated()
                 )
-
-                // JWT filter before request passing
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
