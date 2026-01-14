@@ -16,8 +16,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "https://easychat.vercel.app"
+                "https://easychateasy.vercel.app/"
         ));
 
         config.setAllowedMethods(List.of(
