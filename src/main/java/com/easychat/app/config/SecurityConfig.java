@@ -59,7 +59,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // JWT filter
+                // JWT filter before request passing
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
