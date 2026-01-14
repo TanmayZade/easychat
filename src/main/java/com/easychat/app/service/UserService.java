@@ -51,12 +51,12 @@ public class UserService {
         emailVerificationTokenRepository.save(verificationToken);
 
         //  Send verification email
-//        try {
-//            emailService.sendVerificationEmail(user.getEmail(), token);
-//        } catch (Exception e) {
-//            // Log only – DO NOT throw
-//            System.err.println("Email failed on Render: " + e.getMessage());
-//        }
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), token);
+        } catch (Exception e) {
+            // Log only – DO NOT throw
+            System.err.println("Email failed on Render: " + e.getMessage());
+        }
     }
 
     public User authenticate(String usernameOrEmail, String password){
@@ -67,9 +67,9 @@ public class UserService {
             throw new AuthenticationException("Wrong Password");
         }
 
-//        if(!user.isVerified()){
-//            throw new AuthenticationException("User not verified");
-//        }
+        if(!user.isVerified()){
+            throw new AuthenticationException("User not verified");
+        }
 
         return user;
     }
