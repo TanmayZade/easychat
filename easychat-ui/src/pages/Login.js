@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ensureECCKeys, uploadPublicKey } from "./Crypto";
 import "./Auth.css";
+import API_BASE from "../config/api";
 
 function Login() {
     const [usernameOrEmail, setUsernameOrEmail] = useState("");
@@ -19,7 +20,7 @@ function Login() {
 
         try {
             const res = await fetch(
-                "http://localhost:8080/easychat/api/auth/login",
+                `${API_BASE}/easychat/api/auth/login`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

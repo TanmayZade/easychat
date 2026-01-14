@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Auth.css";
+import API_BASE from "../config/api";
 
 function Register() {
     const [username, setUsername] = useState("");
@@ -20,7 +21,7 @@ function Register() {
 
         try {
             const res = await fetch(
-                "http://localhost:8080/easychat/api/auth/register",
+                `${API_BASE}/easychat/api/auth/register`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

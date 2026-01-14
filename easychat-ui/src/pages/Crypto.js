@@ -1,8 +1,9 @@
+import API_BASE from "../config/api";
+
 const DB_NAME = "easychat-crypto";
 const STORE = "keys";
 console.log("crypto.js loaded");
 
-const API_BASE = "http://localhost:8080";
 
 
 async function abToB64(buf){

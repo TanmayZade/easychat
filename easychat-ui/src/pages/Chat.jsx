@@ -1,7 +1,7 @@
 import {useEffect, useState, useRef} from "react";
 import {useNavigate} from "react-router-dom";
 import "./Chat.css";
-
+import API_BASE from "../config/api";
 import {
     getReceiverPublicKey,
     deriveAESKey,
@@ -14,10 +14,10 @@ import {
 
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import {WS_URL} from "../config/ws";
 
 function Chat(){
     const navigate = useNavigate();
-    const API_BASE = "http://localhost:8080";
 
     //State
     const [receiver, setReceiver] = useState("");
@@ -120,7 +120,7 @@ function Chat(){
 
         const client = new Client({
             webSocketFactory: () =>
-                new SockJS("http://localhost:8080/easychat/ws-chat"),
+                new SockJS(WS_URL),
             connectHeaders: {
                 Authorization: "Bearer " + token,
             },
