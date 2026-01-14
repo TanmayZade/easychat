@@ -52,7 +52,9 @@ public class UserService {
 
         //  Send verification email
         try {
+            System.out.println("Starting Email service");
             emailService.sendVerificationEmail(user.getEmail(), token);
+            System.out.println("Email service ended");
         } catch (Exception e) {
             // Log only – DO NOT throw
             System.err.println("Email failed on Render: " + e.getMessage());
