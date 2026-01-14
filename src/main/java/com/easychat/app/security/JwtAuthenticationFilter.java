@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -16,7 +17,9 @@ import java.io.IOException;
 import java.util.Collections;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final JwtUtil jwtUtil;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -52,12 +55,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (!JwtUtil.isValidToken(token)) {
+        if (!jwtUtil.isValidToken(token)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT");
             return;
         }
 
-        String username = JwtUtil.extractUsername(token);
+        String username = jwtUtil.extractUsername(token);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(

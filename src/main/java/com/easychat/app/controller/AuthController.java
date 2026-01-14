@@ -25,6 +25,8 @@ public class AuthController {
     private final UserService userService;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         System.out.println(">>> PROTECTED CONTROLLER HIT <<<");
@@ -42,7 +44,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest){
         User user = userService.authenticate(loginRequest.getUsernameOrEmail(), loginRequest.getPassword());
-        String token = JwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
