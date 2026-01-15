@@ -120,6 +120,7 @@ export function getUsernameFromJWT() {
     } catch {
         return null;
     }
+}
 
 export async function ensureECCKeys() {
     const username = getUsernameFromJWT();
@@ -193,5 +194,4 @@ export async function uploadPublicKey() {
 
     console.log("Public key uploaded to server");
 
-    }
 }
