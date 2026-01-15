@@ -66,7 +66,6 @@ function Register() {
 
             if (!res.ok) throw new Error("Registration failed");
             setShowVerifyModal(true);
-            setTimeout(() => navigate("/login"), 6000);
         } catch (err) {
             setMsg("❌ Registration failed. Try again.");
         } finally {
