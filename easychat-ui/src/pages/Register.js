@@ -66,9 +66,13 @@ function Register() {
             if (!res.ok) throw new Error("Registration failed");
 
             const data = await res.json();
-            setMsg("✅ Registration successful. Please verify your email by clicking the link sent to your email address.");
-
-            setTimeout(() => navigate("/login"), 5000);
+            setMsg(
+                "✅ Registration successful!\n\n" +
+                "📧 A verification link has been sent to your email address.\n" +
+                "Please click the link to activate your account.\n\n" +
+                "⚠️ If you don’t see the email, check your Spam or Promotions folder."
+            );
+            setTimeout(() => navigate("/login"), 6000);
         } catch (err) {
             setMsg("❌ Registration failed. Try again.");
         } finally {
