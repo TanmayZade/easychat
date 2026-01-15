@@ -90,7 +90,7 @@ function Login() {
                 {msg && <div className="auth-error">{msg}</div>}
                 {!serverReady && (
                     <div className="server-alert">
-                        ⏳ Starting secure server… First login may take up to 30 seconds.
+                        ⏳ Starting secure server… Registration and login will be available shortly.
                     </div>
                 )}
                 <button disabled={!serverReady} className="auth-btn">
@@ -100,11 +100,13 @@ function Login() {
                 <p className="auth-footer">
                     Don’t have an account?{" "}
                     <span
-                        className="auth-link"
-                        onClick={() => navigate("/Register")}
+                        className={`auth-link ${!serverReady ? "disabled" : ""}`}
+                        onClick={() => {
+                            if (serverReady) navigate("/Register");
+                        }}
                     >
-                        Register
-                    </span>
+        Register
+    </span>
                 </p>
             </form>
         </div>
