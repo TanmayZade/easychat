@@ -193,4 +193,5 @@ export async function uploadPublicKey() {
 
     console.log("Public key uploaded to server");
 
+    }
 }
