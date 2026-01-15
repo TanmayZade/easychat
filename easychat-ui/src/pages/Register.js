@@ -170,7 +170,6 @@ function Register() {
                         <ul className="verify-steps">
                             <li>Open your inbox</li>
                             <li>Click the verification link</li>
-                            <li>Return here to log in</li>
                         </ul>
 
                         <p className="verify-note">
