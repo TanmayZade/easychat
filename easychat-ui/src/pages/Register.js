@@ -13,6 +13,7 @@ function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [usernameError, setUsernameError] = useState("");
     const [passwordError, setPasswordError] = useState("");
+    const [showVerifyModal, setShowVerifyModal] = useState(false);
 
     const usernameRegex = /^[a-z0-9]+$/;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
@@ -64,14 +65,7 @@ function Register() {
             );
 
             if (!res.ok) throw new Error("Registration failed");
-
-            const data = await res.json();
-            setMsg(
-                "✅ Registration successful!\n\n" +
-                "📧 A verification link has been sent to your email address.\n" +
-                "Please click the link to activate your account.\n\n" +
-                "⚠️ If you don’t see the email, check your Spam or Promotions folder."
-            );
+            setShowVerifyModal(true);
             setTimeout(() => navigate("/login"), 6000);
         } catch (err) {
             setMsg("❌ Registration failed. Try again.");
@@ -165,6 +159,35 @@ function Register() {
                     </span>
                 </p>
             </form>
+            {showVerifyModal && (
+                <div className="modal-overlay">
+                    <div className="modal-card">
+                        <h3>📧 Verify your email</h3>
+
+                        <p>
+                            We’ve sent a verification link to your email address.
+                        </p>
+
+                        <ul className="verify-steps">
+                            <li>Open your inbox</li>
+                            <li>Click the verification link</li>
+                            <li>Return here to log in</li>
+                        </ul>
+
+                        <p className="verify-note">
+                            ⚠️ If you don’t see the email, check your <b>Spam</b> or <b>Promotions</b> folder.
+                        </p>
+
+                        <button
+                            className="auth-btn"
+                            onClick={() => navigate("/login")}
+                        >
+                            OK, go to Login
+                        </button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
