@@ -105,6 +105,7 @@ function Register() {
                     className="auth-input"
                     placeholder="Full Name"
                     value={name}
+                    required={true}
                     onChange={(e) => setName(e.target.value)}
                 />
 
@@ -112,6 +113,7 @@ function Register() {
                     className="auth-input"
                     type="email"
                     placeholder="Email"
+                    required={true}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
