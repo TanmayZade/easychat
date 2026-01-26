@@ -6,7 +6,7 @@ It guarantees **true end-to-end encryption (E2EE)**, ensuring that only the comm
 ---
 
 ### 🔗 Live Application
-
+(Please wait for 2–3 minutes while the server wakes up.)
 👉 https://easychateasy.vercel.app
 ## 🧩 Overview
 
